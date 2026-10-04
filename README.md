@@ -1,144 +1,227 @@
 # CursorIA
 
-Asistente documental sobre **Cursor y programación con IA**. Prototipo RAG local en Python con búsqueda semántica, respuestas estructuradas y referencias a fragmentos del corpus.
+CursorIA es una aplicación en Python para consultar documentación sobre Cursor y programación con inteligencia artificial. Utiliza un sistema RAG (generación aumentada por recuperación) que busca información en los documentos disponibles y la incorpora al contexto del modelo para elaborar una respuesta.
 
-## Qué puedes demostrar
+Cada consulta permite revisar los fragmentos recuperados, su procedencia y la fecha de revisión. La aplicación incluye documentación resumida de fuentes oficiales y guías prácticas sobre prompts, diagnóstico de errores y organización del trabajo con IA.
 
-- Ingesta de Markdown con metadatos, fragmentación por sección y solapamiento.
-- Embeddings con Ollama (`embeddinggemma`) y recuperación por similitud coseno.
-- Generación con un LLM local (`llama3.2:3b`), contexto limitado a los documentos y salida JSON con citas.
-- Validación de IDs citados, abstención cuando no se recupera contexto y errores comprensibles.
-- Interfaz Streamlit y modo de consulta léxica sin modelos.
-- Pruebas automatizadas y evaluación reproducible de recuperación.
+## Funcionalidades
 
-**Estado:** MVP implementado. Pruebas del núcleo y evaluación léxica ejecutadas. La calidad de embeddings y generación con Ollama debe evaluarse en un equipo con los modelos instalados. No es un agente que ejecute herramientas ni una integración oficial de Cursor.
+- Lectura de documentos Markdown con metadatos de origen y fecha.
+- División del contenido en fragmentos por sección.
+- Búsqueda semántica mediante embeddings y similitud coseno.
+- Generación de respuestas con un modelo local a través de Ollama.
+- Respuestas estructuradas y comprobación de las referencias citadas.
+- Consulta por palabras sin necesidad de instalar modelos.
+- Interfaz web con Streamlit.
 
-## Inicio rápido (Windows)
+## Requisitos
 
-Necesitas Python 3.11 o posterior y Git. Para el RAG completo, instala [Ollama](https://ollama.com/download), mantenlo en ejecución y descarga los modelos. No necesitas una clave API.
+- Python 3.11 o posterior.
+- Git, para clonar el repositorio.
+- [Ollama](https://ollama.com/download), para utilizar la búsqueda semántica y la generación de respuestas.
+
+El modo de consulta por palabras funciona sin Ollama. Para utilizar el RAG completo es necesario descargar los modelos y mantener Ollama en ejecución.
+
+## Instalación
+
+### Windows
+
+Desde PowerShell:
 
 ```powershell
 git clone https://github.com/yassmyss/cursorIA.git
 cd cursorIA
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-La interfaz arranca en **Consulta sin modelos**. Ese modo busca palabras y muestra fragmentos; no genera respuestas ni utiliza embeddings.
+### Linux y macOS
 
-Para activar **RAG con Ollama**:
+```bash
+git clone https://github.com/yassmyss/cursorIA.git
+cd cursorIA
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+```
 
-```powershell
+### Modelos de Ollama
+
+Para utilizar el RAG:
+
+```bash
 ollama pull embeddinggemma
 ollama pull llama3.2:3b
 ```
 
-Selecciona el modo RAG en la barra lateral. El primer uso genera el índice en memoria; las consultas posteriores lo reutilizan. La primera descarga requiere Internet. Después, usando modelos locales y la dirección predeterminada, la consulta al corpus no requiere acceso a Internet. La velocidad depende de la RAM, CPU y GPU del equipo.
+La descarga inicial requiere conexión a Internet. Con los modelos instalados y Ollama ejecutándose en el equipo, las consultas se procesan localmente. El tiempo de respuesta depende de los recursos disponibles.
 
-En Linux/macOS usa `.venv/bin/python` en lugar de `.\.venv\Scripts\python.exe`.
+## Ejecución
 
-## Ejemplo de uso
+En Windows:
 
-Pregunta: **¿Dónde se guardan las reglas de proyecto .mdc?**
+```powershell
+.\.venv\Scripts\python.exe -m streamlit run app.py
+```
 
-Información esperada: se guardan en `.cursor/rules` y pueden versionarse con Git. La aplicación muestra el fragmento recuperado, su ID, tipo de fuente, fecha de revisión y enlace original. La redacción exacta depende del modelo.
+En Linux y macOS:
 
-Otras preguntas:
+```bash
+.venv/bin/python -m streamlit run app.py
+```
+
+Abre en el navegador la dirección que muestra Streamlit en la terminal.
+
+## Uso
+
+La barra lateral permite seleccionar dos modos:
+
+| Modo | Funcionamiento |
+|---|---|
+| Consulta sin modelos | Busca coincidencias por palabras y muestra los fragmentos encontrados. |
+| RAG con Ollama | Busca por similitud semántica y utiliza los fragmentos recuperados para generar una respuesta. |
+
+Escribe una pregunta y pulsa **Consultar**. Por ejemplo:
+
+> ¿Dónde se guardan las reglas de proyecto .mdc?
+
+La información disponible indica que se guardan en `.cursor/rules` y pueden versionarse con Git. Junto al resultado se muestran los fragmentos, sus identificadores y el enlace a la fuente original cuando está disponible.
+
+Otras consultas:
 
 - ¿Los checkpoints sustituyen a Git?
 - ¿Cómo pedir un cambio pequeño y verificable?
 - ¿Qué información debo aportar para investigar un error?
-- ¿Cuál es el precio exacto de Cursor hoy? → No está en el corpus: debe abstenerse. Revisa este comportamiento manualmente.
+- ¿Cómo organizar el inicio de un proyecto con IA?
 
-## Corpus y fuentes
+En el modo RAG, el índice se genera en la primera consulta y se reutiliza durante la sesión. Si cambian los documentos, se reconstruye. También puede renovarse mediante **Reconstruir índice**.
 
-Seis guías en español, revisadas el **4 de octubre de 2026**. Los resúmenes oficiales son paráfrasis propias y no copias completas de páginas. Las recomendaciones originales están identificadas como guías propias; sus prompts no se han probado dentro de Cursor.
+El umbral de similitud se puede ajustar desde la barra lateral. Su valor inicial es `0.30`; es un filtro experimental y no representa la probabilidad de que una respuesta sea correcta.
 
-| Documento | Origen |
+## Documentación incluida
+
+El repositorio contiene seis guías en español, revisadas el **4 de octubre de 2026**.
+
+| Contenido | Fuente |
 |---|---|
-| Reglas | [Cursor: Rules](https://cursor.com/docs/rules) |
+| Reglas de proyecto | [Cursor: Rules](https://cursor.com/docs/rules) |
 | Agent y checkpoints | [Cursor: Agent](https://cursor.com/docs/agent/overview) |
-| Búsqueda y contexto | [Cursor: Search](https://cursor.com/docs/agent/tools/search) |
-| Prompts, diagnóstico y flujo | Elaboración propia de CursorIA |
+| Búsqueda de código y contexto | [Cursor: Search](https://cursor.com/docs/agent/tools/search) |
+| Prompts para cambios pequeños | Guía práctica del proyecto |
+| Diagnóstico de errores | Guía práctica del proyecto |
+| Flujo de trabajo y documentación | Guía práctica del proyecto |
 
-Para añadir documentos, crea un `.md` en `data/docs` con esta cabecera y secciones `##`:
+Los documentos basados en fuentes oficiales son resúmenes, no reproducciones completas. Las guías prácticas están identificadas como contenido propio del proyecto. Los ejemplos de prompts no se han comprobado dentro de Cursor.
+
+### Añadir documentos
+
+Crea un archivo `.md` en `data/docs/` con los siguientes metadatos:
 
 ```markdown
 ---
-title: Título
-source: https://fuente-original.example/documento
+title: Título del documento
+source: https://cursor.com/docs/rules
 kind: Resumen propio de documentación oficial
 reviewed: 2026-10-04
 ---
-## Tema
-Contenido revisado y redactado con tus palabras.
+## Nombre de la sección
+Contenido del documento.
 ```
 
-La aplicación recarga el corpus al consultar y reconstruye el índice si cambia el contenido. También puedes usar «Reconstruir índice». No descarga páginas ni actualiza documentación automáticamente.
+Los campos `title`, `source`, `kind` y `reviewed` son obligatorios. Las secciones se delimitan con encabezados `##`.
 
-## Arquitectura y decisiones
+La incorporación y revisión de documentos es manual. La aplicación no descarga páginas ni actualiza las fuentes automáticamente.
 
-Documentos → fragmentos → embeddings → top 3 por coseno → contexto + pregunta → LLM → JSON validado → respuesta y fuentes.
+## Funcionamiento técnico
 
-- Índice en memoria: suficiente para un corpus pequeño; no es una base de datos vectorial persistente.
-- Cliente HTTP basado en la biblioteca estándar; Streamlit es la única dependencia externa.
-- No se añaden LangChain ni LangGraph: el flujo lineal cabe en módulos pequeños y puede explicarse paso a paso.
-- Umbral semántico inicial 0.30, configurable y experimental. No representa confianza ni está calibrado con una evaluación semántica.
-- El modelo recibe instrucciones de usar exclusivamente el contexto. Se comprueba que las citas existan, pero no se demuestra automáticamente que respalden cada afirmación.
+El proceso de consulta sigue estos pasos:
 
-## Estructura
+1. Leer los documentos y sus metadatos.
+2. Dividir el contenido por secciones en fragmentos de hasta 900 caracteres, con un solapamiento de 120.
+3. Generar embeddings con `embeddinggemma`.
+4. Comparar el embedding de la pregunta con los de los documentos mediante similitud coseno.
+5. Seleccionar hasta tres fragmentos que superen el umbral configurado.
+6. Enviar la pregunta y los fragmentos a `llama3.2:3b`.
+7. Validar la respuesta JSON y los identificadores de las referencias.
 
-| Ruta | Responsabilidad |
+El índice se mantiene en memoria. El cliente de Ollama utiliza la biblioteca estándar de Python para las peticiones HTTP; Streamlit es la única dependencia externa declarada.
+
+Si no se recuperan fragmentos, la aplicación devuelve un mensaje de información insuficiente sin consultar al modelo generativo. Si el modelo indica que no hay información suficiente, omite las citas o cita identificadores inexistentes, también se devuelve ese mensaje.
+
+La validación comprueba que las referencias correspondan a los fragmentos enviados. No comprueba automáticamente que cada afirmación de la respuesta esté respaldada por ellos.
+
+## Estructura del proyecto
+
+| Ruta | Contenido |
 |---|---|
-| `app.py` | Interfaz y caché del índice |
-| `cursoria/retrieval.py` | Lectura, fragmentación, búsqueda y coseno |
-| `cursoria/generation.py` | HTTP Ollama, prompts y validación |
-| `data/docs/` | Corpus con fuentes y fecha |
-| `tests/test_rag.py` | Contratos y casos de error |
-| `eval/questions.json` | Preguntas con documentos esperados |
-| `evaluate.py` | Evaluación de recuperación |
-| `.github/workflows/tests.yml` | Pruebas en GitHub Actions |
+| `app.py` | Interfaz y gestión del índice en caché |
+| `cursoria/retrieval.py` | Lectura, fragmentación y búsqueda |
+| `cursoria/generation.py` | Cliente de Ollama y validación de respuestas |
+| `data/docs/` | Documentos y metadatos |
+| `tests/test_rag.py` | Pruebas del núcleo de la aplicación |
+| `eval/questions.json` | Preguntas y documentos de referencia |
+| `eval/smoke_ui.py` | Comprobación básica de la interfaz |
+| `evaluate.py` | Evaluación de la recuperación |
+| `requirements.txt` | Dependencias |
+| `.github/workflows/tests.yml` | Ejecución de pruebas en GitHub Actions |
 
-## Pruebas y evaluación
+## Configuración
 
-Desde la raíz del repositorio:
+La aplicación admite estas variables de entorno:
 
-```bash
-python -m unittest discover -s tests -v
-python evaluate.py
-python evaluate.py --semantic
-```
-
-Los dos primeros comandos no requieren Ollama ni Streamlit. El tercero requiere Ollama y `embeddinggemma`.
-
-Validación del núcleo: **13 pruebas pasan**. Interfaz comprobada con Streamlit AppTest: inicio, consulta con fuentes, entrada vacía y error controlado sin Ollama. Baseline léxico: **hit rate@3 de 8/8** en ocho preguntas del pequeño conjunto incluido. Esta cifra no mide calidad semántica, generación ni rendimiento en preguntas nuevas. Los dos casos sin respuesta se muestran para revisión manual y no se puntúan como aciertos.
-
-Los tests del cliente usan respuestas simuladas: comprueban contratos, IDs inventados, JSON inválido y fallos de conexión. No sustituyen una prueba de extremo a extremo con un modelo real.
-
-Para evaluar la generación registra, por pregunta: respuesta, citas, si cada afirmación está respaldada y si se abstiene cuando corresponde. Comprueba también la estabilidad ante preguntas que intenten cambiar las instrucciones.
-
-## Configuración opcional
-
-Variables de entorno (la aplicación no lee automáticamente archivos `.env`):
-
-| Variable | Predeterminado |
+| Variable | Valor predeterminado |
 |---|---|
 | `OLLAMA_URL` | `http://localhost:11434` |
 | `EMBEDDING_MODEL` | `embeddinggemma` |
 | `CHAT_MODEL` | `llama3.2:3b` |
 
-Ejemplo PowerShell: `$env:CHAT_MODEL = "llama3.2:3b"` antes de ejecutar Streamlit. Si configuras un servidor remoto, los fragmentos y preguntas se envían a ese servidor.
+Ejemplo en PowerShell, antes de ejecutar la aplicación:
 
-## Limitaciones y próximos hitos
+```powershell
+$env:CHAT_MODEL = "llama3.2:3b"
+```
 
-- El corpus es pequeño y no cubre precios ni todas las funciones de Cursor. Las guías pueden quedar desactualizadas.
-- El modelo puede alucinar incluso con citas válidas. La abstención y las instrucciones contra inyección no son garantías de seguridad.
-- No hay PDF, autenticación, carga de documentos por interfaz ni persistencia del índice.
-- El código no ejecuta acciones en Cursor ni modifica archivos del proyecto consultado.
+Los archivos `.env` no se cargan automáticamente. Si se configura una dirección remota para Ollama, las preguntas y los fragmentos se enviarán a ese servidor.
 
-Próximos hitos: evaluar RAG real y calibrar umbral; ampliar preguntas con paráfrasis y casos fuera del corpus; persistir el índice con invalidación; añadir PDF y referencias por página solo si aporta valor.
+## Pruebas y evaluación
 
-## Para una entrevista
+Ejecuta los comandos desde la raíz del repositorio, con el Python del entorno virtual. En Windows:
 
-Explica la diferencia entre búsqueda léxica y embeddings; por qué se fragmentan los documentos; cómo se calcula el coseno; por qué una cita válida no garantiza fidelidad; y qué medirías antes de ampliar el sistema. Presenta este proyecto como prototipo educativo, con sus pruebas y límites.
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe eval/smoke_ui.py
+.\.venv\Scripts\python.exe evaluate.py
+.\.venv\Scripts\python.exe evaluate.py --semantic
+```
+
+En Linux y macOS, sustituye `.\.venv\Scripts\python.exe` por `.venv/bin/python`.
+
+Las pruebas del núcleo y la evaluación por palabras no requieren Ollama. La comprobación de la interfaz requiere Streamlit. La evaluación semántica requiere Ollama y el modelo de embeddings.
+
+### Comprobaciones realizadas
+
+- 13 pruebas del núcleo superadas.
+- Interfaz comprobada: inicio, consulta con fuentes y validación de preguntas vacías.
+- Gestión del error de conexión comprobada con Ollama no disponible.
+- Recuperación por palabras: documento esperado entre los tres primeros resultados en las ocho preguntas con fuente de referencia.
+
+Los tests del cliente utilizan respuestas simuladas para comprobar errores de conexión, formato JSON y referencias inválidas. La ejecución con modelos reales y la calidad de las respuestas generadas están pendientes de validación.
+
+El conjunto de evaluación incluye dos preguntas sin respuesta en los documentos. Se muestran para revisar el comportamiento de abstención, pero no se contabilizan en la métrica de recuperación. Los resultados del conjunto incluido no permiten concluir cómo se comportará la aplicación ante preguntas nuevas.
+
+## Limitaciones
+
+- La documentación disponible cubre un conjunto reducido de temas y puede quedar desactualizada.
+- No se incluye información sobre precios ni todas las funciones de Cursor.
+- El modelo puede generar respuestas incorrectas aunque las referencias sean válidas.
+- El índice no se conserva entre reinicios.
+- Solo se admiten documentos Markdown.
+- No hay autenticación ni carga de archivos desde la interfaz.
+- La aplicación consulta documentación; no ejecuta acciones en Cursor.
+
+## Mejoras previstas
+
+- Evaluar la recuperación semántica y la fidelidad de las respuestas con modelos reales.
+- Ajustar el umbral a partir de los resultados de evaluación.
+- Ampliar los casos de prueba con preguntas reformuladas y fuera del alcance de los documentos.
+- Incorporar persistencia del índice y control de cambios en los documentos.
+- Añadir soporte para PDF con referencias por página.
