@@ -1,0 +1,12 @@
+[
+  {"question":"¿Dónde se guardan las reglas de proyecto .mdc?","expected":"01_reglas"},
+  {"question":"¿Qué metadatos usan las reglas?","expected":"01_reglas"},
+  {"question":"¿Los checkpoints sustituyen a Git?","expected":"02_agente"},
+  {"question":"¿Qué herramientas tiene Agent?","expected":"02_agente"},
+  {"question":"¿Cómo busco una función con un mensaje de error exacto?","expected":"03_busqueda"},
+  {"question":"¿Cómo pedir un cambio verificable con un prompt?","expected":"04_prompts"},
+  {"question":"¿Cómo investigar un error antes de modificar archivos?","expected":"05_errores"},
+  {"question":"¿Cómo comprobar la documentación y versiones?","expected":"06_flujo"},
+  {"question":"¿Cuál es el precio exacto de Cursor hoy?","expected":null},
+  {"question":"¿Qué seguro médico incluye mi empresa?","expected":null}
+]
